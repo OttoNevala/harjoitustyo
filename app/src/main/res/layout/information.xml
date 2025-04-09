@@ -11,13 +11,13 @@
     <LinearLayout
         android:id="@+id/menuBar"
         android:layout_width="428dp"
-        android:layout_height="145dp"
+        android:layout_height="80dp"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="0dp"
         android:baselineAligned="false"
         android:gravity="center"
         android:orientation="horizontal"
-        android:padding="12dp"
+        android:padding="9dp"
         android:weightSum="3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.529"
@@ -25,15 +25,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <Button
-            android:id="@+id/buttonPerustiedot"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="6dp"
-            android:layout_weight="1"
-            android:text="Perustiedot" />
-
-        <Button
-            android:id="@+id/buttonHaeKunta"
+            android:id="@+id/searchTown"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="6dp"
@@ -41,7 +33,7 @@
             android:text="Hae kunta" />
 
         <Button
-            android:id="@+id/buttonVertailu"
+            android:id="@+id/CompareTowns"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="6dp"
@@ -49,44 +41,62 @@
             android:text="Vertailu" />
     </LinearLayout>
 
+    <!-- Väestökehitys ja Työllisyysaste samalla rivillä -->
+
+    <!-- Työpaikkaomavaraisuus omana rivinä -->
+
 
     <TextView
         android:id="@+id/temperatureText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
         android:text="25°C"
         android:textColor="#FFBF00"
         android:textSize="60sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/menuBar" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/lastSearch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="76dp"
         android:text="City"
         android:textColor="@android:color/white"
         android:textSize="35sp"
         android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/weatherIcon"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.492"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
+
         app:layout_constraintTop_toBottomOf="@id/menuBar" />
 
-    <!-- Väestökehitys ja Työllisyysaste samalla rivillä -->
+    <ImageView
+        android:id="@+id/weatherIcon"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/ic_01d"
+        android:contentDescription="Weather Icon
+"
+        android:elevation="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/HumidityWindRow"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/temperatureText"
 
-    <!-- Työpaikkaomavaraisuus omana rivinä -->
+        app:layout_constraintVertical_bias="0.521" />
 
     <LinearLayout
 
-        android:id="@+id/linearLayout"
+        android:id="@+id/HumidityWindRow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="92dp"
+        android:layout_marginTop="292dp"
         android:background="@drawable/background2"
         android:gravity="center"
         android:orientation="horizontal"
@@ -101,7 +111,7 @@
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_margin="8dp"
-            android:src="@drawable/Humidity" />
+            android:src="@drawable/humidity" />
 
 
         <TextView
@@ -127,14 +137,49 @@
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_margin="8dp"
-            android:src="@drawable/Wind" />
+            android:src="@drawable/wind" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/employmentSelfSufficiencyLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/background2"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/populationEmploymentRow"
+        app:layout_constraintVertical_bias="0.095">
+
+        <TextView
+            android:id="@+id/employmentSelfSufficiencyTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Työpaikkaomavaraisuus"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/employmentSelfSufficiencyValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="91 %"
+            android:textColor="@android:color/white"
+            android:textSize="14sp" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/populationEmploymentRow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="24dp"
         android:background="@drawable/background2"
         android:gravity="center"
         android:orientation="horizontal"
@@ -142,7 +187,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/linearLayout">
+        app:layout_constraintTop_toBottomOf="@id/HumidityWindRow">
 
         <!-- Väestökehitys -->
         <LinearLayout
@@ -199,40 +244,19 @@
         </LinearLayout>
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/employmentSelfSufficiencyLayout"
+    <TextView
+        android:id="@+id/wheatherDescription"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/background2"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="Kirjoitas höntti oikein se kaupunki"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/HumidityWindRow"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/populationEmploymentRow"
-        app:layout_constraintVertical_bias="0.0">
-
-        <TextView
-            android:id="@+id/employmentSelfSufficiencyTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Työpaikkaomavaraisuus"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/employmentSelfSufficiencyValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="91 %"
-            android:textColor="@android:color/white"
-            android:textSize="14sp" />
-    </LinearLayout>
+        app:layout_constraintTop_toBottomOf="@+id/weatherIcon"
+        app:layout_constraintVertical_bias="0.56" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
