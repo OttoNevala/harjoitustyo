@@ -1,54 +1,43 @@
+//read me
+//this class is created for switching between fragments
+
 package com.example.olioohjelmointiharjoitusty;
 
-import android.content.Intent;
 import android.os.Bundle;
-import androidx.activity.EdgeToEdge;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.viewpager2.widget.ViewPager2;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView lastSearch;
-    private Button searchCity;
-    private EditText cityNameInput;
+    private TabLayout tabLayout;
+    private ViewPager2 viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        // Aseta reunat reunojen yli näkyviksi ja säädä padding järjestelmän tilan mukaan
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        tabLayout = findViewById(R.id.tab_layout);
+        viewPager = findViewById(R.id.view_pager);
 
-        lastSearch = findViewById(R.id.lastSearch);
-        searchCity = findViewById(R.id.searchCity);
-        cityNameInput = findViewById(R.id.cityNameInput);
 
-        searchCity.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String city = cityNameInput.getText().toString().trim();
 
-                if (city.isEmpty()) {
-                    Toast.makeText(MainActivity.this, "Syötä kunnan nimi", Toast.LENGTH_SHORT).show();
-                } else {
-                    Intent intent = new Intent(MainActivity.this, Information.class);
-                    intent.putExtra("cityName", city);
-                    startActivity(intent);
-                }
+        ViewPagerAdapter adapter = new ViewPagerAdapter(this);
+        viewPager.setAdapter(adapter);
+
+        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
+            if (position == 0) {
+                tab.setText("Haku");
+            } else if (position == 1) {
+                tab.setText("Tiedot");
+            } else {
+                tab.setText("Visa");
             }
-        });
+        }).attach();
     }
 }
