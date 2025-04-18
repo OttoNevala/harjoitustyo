@@ -13,6 +13,14 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.olioohjelmointiharjoitusty.R;
 import com.example.olioohjelmointiharjoitusty.SharedViewModel;
+import com.example.olioohjelmointiharjoitusty.ShowData.WorkSelfSufficiencyDataRetriever;
+
+
+import com.example.olioohjelmointiharjoitusty.ShowData.EmploymentRateDataRetriever;
+import com.example.olioohjelmointiharjoitusty.ShowData.PopulationDataRetriever;
+import com.example.olioohjelmointiharjoitusty.ShowData.PopulationData;
+
+
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -20,11 +28,9 @@ import java.util.concurrent.Executors;
 public class InformationFragment extends Fragment {
 
     private TextView temperatureText, lastSearch, humidityText, windText, weatherDescription;
+    private TextView populationText, employmentText, selfSufficiencyText;
     private ImageView weatherIcon;
     private SharedViewModel sharedViewModel;
-
-    public InformationFragment() {
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -36,12 +42,19 @@ public class InformationFragment extends Fragment {
         windText = view.findViewById(R.id.windText);
         weatherDescription = view.findViewById(R.id.wheatherDescription);
         weatherIcon = view.findViewById(R.id.weatherIcon);
+        populationText = view.findViewById(R.id.populationValue);
+        employmentText = view.findViewById(R.id.employmentRateValue);
+        selfSufficiencyText = view.findViewById(R.id.selfSufficiencyValue);
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         sharedViewModel.getCityName().observe(getViewLifecycleOwner(), city -> {
             if (city != null && !city.isEmpty()) {
                 lastSearch.setText(city);
                 fetchWeatherData(city);
+                fetchPopulationData(city);
+                fetchEmploymentData(city);
+                fetchSelfSufficiencyData(city);
+
             }
         });
 
@@ -55,16 +68,13 @@ public class InformationFragment extends Fragment {
             try {
                 String result = repo.fetch(city);
                 if (result != null) {
-                    //parse result and crete wheather object
                     WeatherParser.WeatherData data = WeatherParser.parse(result);
-
                     requireActivity().runOnUiThread(() -> updateUi(data));
                 } else {
                     requireActivity().runOnUiThread(() ->
                             Toast.makeText(getActivity(), "Tyhjä vastaus palvelimelta", Toast.LENGTH_SHORT).show());
                 }
             } catch (Exception e) {
-                // Show error if something goes wrong
                 e.printStackTrace();
                 requireActivity().runOnUiThread(() ->
                         Toast.makeText(getActivity(), "Virhe haettaessa säätietoja", Toast.LENGTH_SHORT).show());
@@ -82,5 +92,16 @@ public class InformationFragment extends Fragment {
         String resourceName = "ic_" + data.iconCode;
         int resourceId = getResources().getIdentifier(resourceName, "drawable", requireActivity().getPackageName());
         weatherIcon.setImageResource(resourceId);
+    }
+
+    private void fetchPopulationData(String city) {
+        new PopulationDataRetriever().getData(requireContext(), city, populationText);
+    }
+
+    private void fetchEmploymentData(String city) {
+        new EmploymentRateDataRetriever().getData(requireContext(), city, employmentText);
+    }
+    private void fetchSelfSufficiencyData(String city) {
+        new WorkSelfSufficiencyDataRetriever().getData(requireContext(), city, selfSufficiencyText);
     }
 }

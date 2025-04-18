@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@drawable/background">
+
+    <TextView
+        android:id="@+id/compareTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Vertaa kuntia"
+        android:textSize="24sp"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"/>
+
+    <TextView
+        android:id="@+id/cityOneName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Kaupunki 1"
+        android:textSize="18sp"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/compareTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/cityTwoName"
+        app:layout_constraintHorizontal_weight="1"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/cityTwoName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Kaupunki 2"
+        android:textSize="18sp"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/compareTitle"
+        app:layout_constraintStart_toEndOf="@id/cityOneName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/cityOnePopulation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Väkiluku"
+        android:textSize="16sp"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/cityOneName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/cityTwoPopulation"
+        app:layout_constraintHorizontal_weight="1"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/cityTwoPopulation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Väkiluku"
+        android:textSize="16sp"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/cityTwoName"
+        app:layout_constraintStart_toEndOf="@id/cityOnePopulation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/cityOneEmployment"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Työllisyys"
+        android:textSize="16sp"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/cityOnePopulation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/cityTwoEmployment"
+        app:layout_constraintHorizontal_weight="1"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/cityTwoEmployment"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Työllisyys"
+        android:textSize="16sp"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/cityTwoPopulation"
+        app:layout_constraintStart_toEndOf="@id/cityOneEmployment"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        android:gravity="center"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

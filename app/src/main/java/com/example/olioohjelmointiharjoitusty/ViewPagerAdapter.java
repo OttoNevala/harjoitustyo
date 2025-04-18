@@ -1,5 +1,5 @@
-//Read me
-//This class is created for switching between fragments
+// Read me
+// This class is created for switching between fragments
 
 package com.example.olioohjelmointiharjoitusty;
 
@@ -10,6 +10,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.example.olioohjelmointiharjoitusty.ShowData.InformationFragment;
 import com.example.olioohjelmointiharjoitusty.quiz.QuizFragment;
+// import com.example.olioohjelmointiharjoitusty.comparison.CompareFragment; // Ota käyttöön myöhemmin
 
 public class ViewPagerAdapter extends FragmentStateAdapter {
 
@@ -25,12 +26,13 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
         } else if (position == 1) {
             return new InformationFragment();
         } else {
-            return new QuizFragment();
+            return new QuizFragment(); // position == 2
+            // return new CompareFragment(); // position == 3 (kommentoitu pois toistaiseksi)
         }
     }
 
     @Override
     public int getItemCount() {
-        return 3;
+        return 3; // Palauta 4 kun CompareFragment otetaan käyttöön
     }
 }
