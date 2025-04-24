@@ -95,13 +95,35 @@ public class InformationFragment extends Fragment {
     }
 
     private void fetchPopulationData(String city) {
-        new PopulationDataRetriever().getData(requireContext(), city, populationText);
+        new PopulationDataRetriever().getData(requireContext(), city, populationText, population -> {
+            populationText.setText(population + "");
+            if (city.equalsIgnoreCase(sharedViewModel.getFirstCity().getValue())) {
+                sharedViewModel.setPopulation1(population);
+            } else if (city.equalsIgnoreCase(sharedViewModel.getSecondCity().getValue())) {
+                sharedViewModel.setPopulation2(population);
+            }
+        });
     }
 
     private void fetchEmploymentData(String city) {
-        new EmploymentRateDataRetriever().getData(requireContext(), city, employmentText);
+        new EmploymentRateDataRetriever().getData(requireContext(), city, employmentText, rate -> {
+            employmentText.setText(String.format("%.1f %%", rate));
+            if (city.equalsIgnoreCase(sharedViewModel.getFirstCity().getValue())) {
+                sharedViewModel.setEmployment1(rate);
+            } else if (city.equalsIgnoreCase(sharedViewModel.getSecondCity().getValue())) {
+                sharedViewModel.setEmployment2(rate);
+            }
+        });
     }
+
     private void fetchSelfSufficiencyData(String city) {
-        new WorkSelfSufficiencyDataRetriever().getData(requireContext(), city, selfSufficiencyText);
+        new WorkSelfSufficiencyDataRetriever().getData(requireContext(), city, selfSufficiencyText, rate -> {
+            selfSufficiencyText.setText(String.format("Työomavaraisuus: %.1f %%", rate));
+            if (city.equalsIgnoreCase(sharedViewModel.getFirstCity().getValue())) {
+                sharedViewModel.setSufficiency1(rate);
+            } else if (city.equalsIgnoreCase(sharedViewModel.getSecondCity().getValue())) {
+                sharedViewModel.setSufficiency2(rate);
+            }
+        });
     }
 }

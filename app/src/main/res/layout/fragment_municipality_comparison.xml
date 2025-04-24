@@ -6,10 +6,10 @@
 
     <TextView
         android:id="@+id/comparisonPlaceholder"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="238dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
         android:text="Municipality Comparison Here"
-        android:textSize="20sp"
         android:textColor="@android:color/white"
-        android:layout_gravity="center" />
+        android:textSize="20sp" />
 </FrameLayout>

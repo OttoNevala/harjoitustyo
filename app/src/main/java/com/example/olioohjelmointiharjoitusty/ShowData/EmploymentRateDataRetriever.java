@@ -20,123 +20,105 @@ import java.util.HashMap;
 
 public class EmploymentRateDataRetriever {
 
-    public void getData(final Context context, final String municipality, final TextView employmentRatePercentageText) {
+    public void getData(Context context,
+                        String municipality,
+                        TextView employmentRatePercentageText) {
+
+        getData(context, municipality, employmentRatePercentageText, null);
+    }
+
+    public void getData(Context context,
+                        String municipality,
+                        TextView employmentRatePercentageText,
+                        ResultCallback<Double> callback) {
+
         new Thread(() -> {
-            ObjectMapper objectMapper = new ObjectMapper();
-
             try {
-                JsonNode metadata = objectMapper.readTree(
-                        new URL("https://pxdata.stat.fi:443/PxWeb/api/v1/fi/StatFin/tyokay/statfin_tyokay_pxt_115x.px")
-                );
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode metadata = mapper.readTree(
+                        new URL("https://pxdata.stat.fi:443/PxWeb/api/v1/fi/StatFin/tyokay/statfin_tyokay_pxt_115x.px"));
 
-                JsonNode variables = metadata.get("variables");
-                JsonNode alueVariable = null;
-
-                for (JsonNode variable : variables) {
-                    if (variable.get("code").asText().equals("Alue")) {
-                        alueVariable = variable;
+                JsonNode alueVar = null;
+                for (JsonNode var : metadata.get("variables")) {
+                    if ("Alue".equals(var.get("code").asText())) {
+                        alueVar = var;
                         break;
                     }
                 }
-
-                if (alueVariable == null) {
-                    return;
-                }
+                if (alueVar == null) return;
 
                 ArrayList<String> keys = new ArrayList<>();
-                ArrayList<String> values = new ArrayList<>();
-                for (JsonNode name : alueVariable.get("valueTexts")) {
-                    keys.add(name.asText());
-                }
-                for (JsonNode code : alueVariable.get("values")) {
-                    values.add(code.asText());
-                }
+                ArrayList<String> vals = new ArrayList<>();
+                for (JsonNode n : alueVar.get("valueTexts")) keys.add(n.asText());
+                for (JsonNode n : alueVar.get("values"))     vals.add(n.asText());
 
-                HashMap<String, String> municipalityCodes = new HashMap<>();
-                for (int i = 0; i < keys.size(); i++) {
-                    municipalityCodes.put(keys.get(i).trim(), values.get(i));
-                }
+                HashMap<String, String> codes = new HashMap<>();
+                for (int i = 0; i < keys.size(); i++) codes.put(keys.get(i).trim(), vals.get(i));
 
-                String code = municipalityCodes.get(municipality.trim());
-                if (code == null) {
-                    for (String key : municipalityCodes.keySet()) {
-                        if (key.equalsIgnoreCase(municipality.trim())) {
-                            code = municipalityCodes.get(key);
-                            break;
-                        }
-                    }
-                }
+                String code = codes.getOrDefault(municipality.trim(),
+                        codes.keySet().stream()
+                                .filter(k -> k.equalsIgnoreCase(municipality.trim()))
+                                .findFirst()
+                                .map(codes::get)
+                                .orElse(null));
+                if (code == null) return;
 
-                if (code == null) {
-                    return;
-                }
+                ObjectNode root = mapper.createObjectNode();
+                ArrayNode arr = mapper.createArrayNode();
 
-                // This is our Json query which allows us to find right data.
-                ObjectNode queryRoot = objectMapper.createObjectNode();
-                ArrayNode queryArray = objectMapper.createArrayNode();
-
-                ObjectNode tiedot = objectMapper.createObjectNode();
+                ObjectNode tiedot = mapper.createObjectNode();
                 tiedot.put("code", "Tiedot");
-                ObjectNode selectionTiedot = objectMapper.createObjectNode();
-                selectionTiedot.put("filter", "item");
-                selectionTiedot.set("values", objectMapper.createArrayNode().add("tyollisyysaste"));
-                tiedot.set("selection", selectionTiedot);
-                queryArray.add(tiedot);
+                ObjectNode selTiedot = mapper.createObjectNode();
+                selTiedot.put("filter", "item");
+                selTiedot.set("values", mapper.createArrayNode().add("tyollisyysaste"));
+                tiedot.set("selection", selTiedot);
+                arr.add(tiedot);
 
-                ObjectNode alue = objectMapper.createObjectNode();
+                ObjectNode alue = mapper.createObjectNode();
                 alue.put("code", "Alue");
-                ObjectNode selectionAlue = objectMapper.createObjectNode();
-                selectionAlue.put("filter", "item");
-                selectionAlue.set("values", objectMapper.createArrayNode().add(code));
-                alue.set("selection", selectionAlue);
-                queryArray.add(alue);
+                ObjectNode selAlue = mapper.createObjectNode();
+                selAlue.put("filter", "item");
+                selAlue.set("values", mapper.createArrayNode().add(code));
+                alue.set("selection", selAlue);
+                arr.add(alue);
 
-                ObjectNode vuosi = objectMapper.createObjectNode();
+                ObjectNode vuosi = mapper.createObjectNode();
                 vuosi.put("code", "Vuosi");
-                ObjectNode selectionVuosi = objectMapper.createObjectNode();
-                selectionVuosi.put("filter", "top");
-                selectionVuosi.set("values", objectMapper.createArrayNode().add("1"));
-                vuosi.set("selection", selectionVuosi);
-                queryArray.add(vuosi);
+                ObjectNode selVuosi = mapper.createObjectNode();
+                selVuosi.put("filter", "top");
+                selVuosi.set("values", mapper.createArrayNode().add("1"));
+                vuosi.set("selection", selVuosi);
+                arr.add(vuosi);
 
-                queryRoot.set("query", queryArray);
-                queryRoot.set("response", objectMapper.createObjectNode().put("format", "json-stat2"));
+                root.set("query", arr);
+                root.set("response", mapper.createObjectNode().put("format", "json-stat2"));
 
-                // Here we send the post request to Tilastokeskus's API
-                URL apiUrl = new URL("https://pxdata.stat.fi:443/PxWeb/api/v1/fi/StatFin/tyokay/statfin_tyokay_pxt_115x.px");
-                HttpURLConnection con = (HttpURLConnection) apiUrl.openConnection();
+                URL api = new URL("https://pxdata.stat.fi:443/PxWeb/api/v1/fi/StatFin/tyokay/statfin_tyokay_pxt_115x.px");
+                HttpURLConnection con = (HttpURLConnection) api.openConnection();
                 con.setRequestMethod("POST");
                 con.setRequestProperty("Content-Type", "application/json; utf-8");
                 con.setRequestProperty("Accept", "application/json");
                 con.setDoOutput(true);
 
-                byte[] input = objectMapper.writeValueAsBytes(queryRoot);
-                OutputStream os = con.getOutputStream();
-                os.write(input);
-                os.close();
+                byte[] body = mapper.writeValueAsBytes(root);
+                try (OutputStream os = con.getOutputStream()) { os.write(body); }
 
-                BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
-                StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = br.readLine()) != null) {
-                    response.append(line.trim());
-                }
-                br.close();
-
-                JsonNode responseJson = objectMapper.readTree(response.toString());
-                JsonNode valueNode = responseJson.get("value");
-
-                if (valueNode == null || valueNode.size() == 0) {
-                    return;
+                StringBuilder resp = new StringBuilder();
+                try (BufferedReader br = new BufferedReader(
+                        new InputStreamReader(con.getInputStream(), "utf-8"))) {
+                    String line;
+                    while ((line = br.readLine()) != null) resp.append(line.trim());
                 }
 
-                double employmentRatePercentage = valueNode.get(0).asDouble();
-                String resultText = employmentRatePercentage + " %";
+                JsonNode valueNode = mapper.readTree(resp.toString()).get("value");
+                if (valueNode == null || valueNode.size() == 0) return;
 
+                double rate = valueNode.get(0).asDouble();
+                String txt = rate + " %";
 
-                //This refreshes the UI
                 new Handler(Looper.getMainLooper()).post(() -> {
-                    employmentRatePercentageText.setText(resultText);
+                    employmentRatePercentageText.setText(txt);
+                    if (callback != null) callback.onResult(rate);
                 });
 
             } catch (Exception e) {

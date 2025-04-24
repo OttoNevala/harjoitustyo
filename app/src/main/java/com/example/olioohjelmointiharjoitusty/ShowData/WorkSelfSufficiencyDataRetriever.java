@@ -1,132 +1,95 @@
 package com.example.olioohjelmointiharjoitusty.ShowData;
 
 import android.content.Context;
-import android.widget.TextView;
 import android.os.Handler;
 import android.os.Looper;
+import android.widget.TextView;
 
+import com.example.olioohjelmointiharjoitusty.R;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import com.example.olioohjelmointiharjoitusty.R;
 
 public class WorkSelfSufficiencyDataRetriever {
 
-    // This retrieves the work self-sufficiency data from Tilastokeskus API
-    // and updates the provided TextView (workSelfSufficiencyText) on the main thread.
-    public void getData(final Context context, final String municipality, final TextView workSelfSufficiencyText) {
+    public void getData(Context context,
+                        String municipality,
+                        TextView workSelfSufficiencyText) {
+
+        getData(context, municipality, workSelfSufficiencyText, null);
+    }
+
+    public void getData(Context context,
+                        String municipality,
+                        TextView workSelfSufficiencyText,
+                        ResultCallback<Double> callback) {
+
         new Thread(() -> {
-            ObjectMapper objectMapper = new ObjectMapper();
-
-            // This retrieves municipality codes
-            JsonNode areas = null;
             try {
-                areas = objectMapper.readTree(
-                        new URL("https://pxdata.stat.fi:443/PxWeb/api/v1/fi/StatFin/tyokay/statfin_tyokay_pxt_125s.px")
-                );
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-                return;
-            } catch (IOException e) {
-                e.printStackTrace();
-                return;
-            }
-            System.out.println(areas.toPrettyString());
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode areas = mapper.readTree(
+                        new URL("https://pxdata.stat.fi:443/PxWeb/api/v1/fi/StatFin/tyokay/statfin_tyokay_pxt_125s.px"));
 
-            ArrayList<String> keys = new ArrayList<>();
-            ArrayList<String> values = new ArrayList<>();
+                ArrayList<String> keys = new ArrayList<>();
+                ArrayList<String> vals = new ArrayList<>();
+                for (JsonNode n : areas.get("variables").get(1).get("values"))     vals.add(n.asText());
+                for (JsonNode n : areas.get("variables").get(1).get("valueTexts")) keys.add(n.asText());
 
-            // This reads through the municipality codes
-            for (JsonNode node : areas.get("variables").get(1).get("values")) {
-                values.add(node.asText());
-            }
-            for (JsonNode node : areas.get("variables").get(1).get("valueTexts")) {
-                keys.add(node.asText());
-            }
-            HashMap<String, String> municipalityCodes = new HashMap<>();
-            for (int i = 0; i < keys.size(); i++) {
-                municipalityCodes.put(keys.get(i), values.get(i));
-            }
-            String code = municipalityCodes.get(municipality);
+                HashMap<String, String> codes = new HashMap<>();
+                for (int i = 0; i < keys.size(); i++) codes.put(keys.get(i), vals.get(i));
+                String code = codes.get(municipality);
 
-            // This connects to the Tilastokeskus web
-            try {
-                URL url = new URL("https://pxdata.stat.fi:443/PxWeb/api/v1/fi/StatFin/tyokay/statfin_tyokay_pxt_125s.px");
-                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                URL api = new URL("https://pxdata.stat.fi:443/PxWeb/api/v1/fi/StatFin/tyokay/statfin_tyokay_pxt_125s.px");
+                HttpURLConnection con = (HttpURLConnection) api.openConnection();
                 con.setRequestMethod("POST");
                 con.setRequestProperty("Content-Type", "application/json; utf-8");
                 con.setRequestProperty("Accept", "application/json");
                 con.setDoOutput(true);
 
-                // This uses the R.raw.sufficiency_query to conduct its JSON query from Tilastokeskus.
-                JsonNode jsonInputString = objectMapper.readTree(
-                        context.getResources().openRawResource(R.raw.sufficiency_query)
-                );
-
-                // This adds the municipality code to the "Alue" dimension.
-                ((ObjectNode) jsonInputString.get("query").get(0).get("selection"))
+                JsonNode query = mapper.readTree(context.getResources().openRawResource(R.raw.sufficiency_query));
+                ((ObjectNode) query.get("query").get(0).get("selection"))
                         .putArray("values").add(code);
 
-                byte[] input = objectMapper.writeValueAsBytes(jsonInputString);
-                OutputStream os = con.getOutputStream();
-                os.write(input, 0, input.length);
-                os.close();
+                byte[] body = mapper.writeValueAsBytes(query);
+                try (OutputStream os = con.getOutputStream()) { os.write(body); }
 
-                BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
-                StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = br.readLine()) != null) {
-                    response.append(line.trim());
+                StringBuilder resp = new StringBuilder();
+                try (BufferedReader br = new BufferedReader(
+                        new InputStreamReader(con.getInputStream(), "utf-8"))) {
+                    String line;
+                    while ((line = br.readLine()) != null) resp.append(line.trim());
                 }
-                br.close();
 
-                // This reads through the response we got.
-                JsonNode municipalityData = objectMapper.readTree(response.toString());
-
-                // This reads through the year codes from our year dimension.
+                JsonNode data = mapper.readTree(resp.toString());
                 ArrayList<String> years = new ArrayList<>();
-                for (JsonNode node : municipalityData.get("dimension").get("Vuosi").get("category").get("label")) {
-                    years.add(node.asText());
-                }
+                for (JsonNode n : data.get("dimension").get("Vuosi").get("category").get("label"))
+                    years.add(n.asText());
 
-                // This searches for the value table
-                JsonNode valuesNode = municipalityData.get("value");
-                int index = municipalityData.get("dimension")
-                        .get("Tiedot").get("category").get("label").size();
+                JsonNode valsNode = data.get("value");
+                int col = data.get("dimension").get("Tiedot").get("category").get("label").size();
 
-                // This searches the data from the latest year. Currently it's 2023 as of writing this code.
                 if (years.size() > 0) {
-                    int lastIndex = years.size() - 1;
-                    int baseIndex = lastIndex * index;
-                    double workSelfSufficiencyPercentage = Double.valueOf(valuesNode.get(baseIndex).asText());
+                    int base = (years.size() - 1) * col;
+                    double pct = Double.valueOf(valsNode.get(base).asText());
+                    String txt = "Työomavaraisuus: " + pct + "%";
 
-                    // This creates a WorkSelfSufficiencyData instance.
-                    WorkSelfSufficiencyData workData = new WorkSelfSufficiencyData(workSelfSufficiencyPercentage);
-
-                    String resultText = "Työomavaraisuus: " + workData.getWorkSelfSufficiencyPercentage() + "%";
-
-                    // This refreshes the UI in our main thread.
                     new Handler(Looper.getMainLooper()).post(() -> {
-                        workSelfSufficiencyText.setText(resultText);
+                        workSelfSufficiencyText.setText(txt);
+                        if (callback != null) callback.onResult(pct);
                     });
                 }
 
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }).start();
     }
 }
-
